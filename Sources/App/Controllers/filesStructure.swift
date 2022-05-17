@@ -2,7 +2,7 @@ import Foundation
 import Vapor
 
 struct Pages: Content {
-    func safeShell(_ command: String, _ path: String) throws -> String {
+    func show(_ command: String, _ path: String) throws -> String {
         let task = Process()
         let pipe = Pipe()
         
@@ -19,12 +19,14 @@ struct Pages: Content {
         
         return output
     }
-//    var name: String
-//    var path: String
+    //    var name: String
+    //    var path: String
     //    var ID: Int
     //    var repo: String
     //    var content: String
 }
+
+
 
 //safeShell("ls", "/Users/kl/Desktop/localRepo")
 //
