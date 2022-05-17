@@ -5,7 +5,13 @@ func routes(_ app: Application) throws {
         return "It works!"
     }
 
-    app.get("hello") { req -> String in
+    app.get("list") { req -> String in
+        let pages = try req.query.decode(Pages.self)
+        let listPages = try pages.safeShell("ls", "/Users/kl/Desktop/localRepo")
+        return listPages
+    }
+    
+    app.get("home") { req -> String in
         return "Hello, world!"
     }
 }
