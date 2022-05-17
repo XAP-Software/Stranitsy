@@ -3,53 +3,63 @@ import React from 'react';
 import {Navigation} from 'react-minimal-side-navigation';
 import 'react-minimal-side-navigation/lib/ReactMinimalSideNavigation.css';
 
-class Sidebar extends React.Component{
-    render() {
-        return (
-            <Navigation
-                // you can use your own router's api to get pathname
-                activeItemId="/management/members"
-                onSelect={({itemId}) => {
-                    // maybe push to the route
-                }}
-                items={[
+function Sidebar() {
+    return (
+        <Navigation
+            // you can use your own router's api to get pathname
+            activeItemId="/management/members"
+            onSelect={({itemId}) => {
+                // history.push(itemId);
+            }}
+            items={[
+                {
+                title: 'Book',
+                itemId: '/Book',
+                subNav: [
                     {
-                    title: 'Dashboard',
-                    itemId: '/dashboard',
-                    // you can use your own custom Icon component as well
-                    // icon is optional
-                    // elemBefore: () => <Icon name="inbox" />,
-                    },
-                    {
-                    title: 'Management',
-                    itemId: '/management',
-                    // elemBefore: () => <Icon name="users" />,
+                    title: 'Page1',
+                    itemId: '/Book/Page1',
                     subNav: [
                         {
-                        title: 'Projects',
-                        itemId: '/management/projects',
-                        },
-                        {
-                        title: 'Members',
-                        itemId: '/management/members',
-                        },
+                            title: 'Page1.1',
+                            itemId: '/Book/Page1/Page1.1',
+                        }
                     ],
                     },
                     {
-                    title: 'Another Item',
-                    itemId: '/another',
-                    subNav: [
-                        {
-                        title: 'Teams',
-                        itemId: '/management/teams',
-                        },
-                    ],
+                    title: 'Members',
+                    itemId: '/Book/members',
                     },
-                ]}
-                />
-        )
-
-    }
+                ],
+                },
+                {
+                title: 'Management',
+                itemId: '/management',
+                // elemBefore: () => <Icon name="users" />,
+                subNav: [
+                    {
+                    title: 'Projects',
+                    itemId: '/management/projects',
+                    },
+                    {
+                    title: 'Members',
+                    itemId: '/management/members',
+                    },
+                ],
+                },
+                {
+                title: 'Another Item',
+                itemId: '/another',
+                subNav: [
+                    {
+                    title: 'Teams',
+                    itemId: '/management/teams',
+                    },
+                ],
+                },
+            ]}
+        />
+    )
 }
 
 export default Sidebar;

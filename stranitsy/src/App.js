@@ -3,8 +3,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import Editor from "rich-markdown-editor";
 import Sidebar from "./sidebar";
-// import {Navigation} from 'react-minimal-side-navigation';
-// import 'react-minimal-side-navigation/lib/ReactMinimalSideNavigation.css';
 
 const element = document.getElementById("main");
 const savedText = localStorage.getItem("saved");
