@@ -2,7 +2,9 @@ import './App.css';
 import React from "react";
 import ReactDOM from "react-dom";
 import Editor from "rich-markdown-editor";
-import Sidebar from "./sidebar";
+// import Sidebar from "./sidebar";
+import ListPages from './components/ListPages';
+import multiNavbar from './components/multiNavBar';
 
 const element = document.getElementById("main");
 const savedText = localStorage.getItem("saved");
@@ -62,13 +64,20 @@ class App extends React.Component {
     const { body } = document;
     if (body) body.style.backgroundColor = this.state.dark ? "#181A1B" : "#FFF";
 
+    // const pages = this.pagesStructure.split('\n').map((number) =>
+    //     <li>{number}</li>
+    // );
+    
     return (
       <React.Fragment>
         <div className='App'>
           <div className='sidebarSpace'>
-            <Sidebar
-              
-            />
+            {/* <multiNavbar data={pages} /> */}
+            <ul>
+              <ul>
+                </ul>
+            </ul>
+            <ListPages/>
           </div>
           <div className='editorSpace'>
             <div>
