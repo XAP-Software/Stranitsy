@@ -9,8 +9,7 @@ export default class ListPages extends React.Component {
   componentDidMount() {
     axios.get(`http://localhost:8080/list`)
       .then(res => {
-        const pages = res.data.split('\n');
-        console.log(pages);
+        const pages = res.data;
         this.setState({ pages });
       })
   }
