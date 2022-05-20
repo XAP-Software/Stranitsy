@@ -40,105 +40,6 @@ const foo = 'foo'; // code
 
 `;
 
-// export const Persisted = Template.bind({});
-// Persisted.args = {
-//   defaultValue:
-//     localStorage.getItem("saved") ||
-//     `# Persisted
-  
-// The contents of this editor are persisted to local storage on change (edit and reload)`,
-//   onChange: debounce(value => {
-//     const text = value();
-//     localStorage.setItem("saved", text);
-//   }, 250),
-// };
-
-const menuData = [
-  {
-    name: "home",
-    url: "/"
-  },
-  {
-    name: "manu 1",
-    children: [
-      {
-        name: "manu 1.1",
-        url: "/page/manu-1-1"
-      }
-    ]
-  },
-  {
-    name: "manu 2",
-    url: "/page/manu-2"
-  },
-  {
-    name: "manu 3",
-    children: [
-      {
-        name: "manu 3.1",
-        url: "/page/manu-3-1"
-      },
-      {
-        name: "manu 3.2",
-        url: "/page/manu-3-2"
-      },
-      {
-        name: "manu 3.3",
-        children: [
-          {
-            name: "manu 3.3.1",
-            url: "/page/manu-3-3-1"
-          },
-        ]
-      }
-    ]
-  },
-  {
-    name: "manu 4",
-    children: [
-      {
-        name: "manu 4.1",
-        url: "/page/manu-4-1"
-      },
-      {
-        name: "manu 4.2",
-        url: "/page/manu-4-2"
-      },
-      {
-        name: "manu 4.3",
-        children: [
-          {
-            name: "manu 4.3.1",
-            url: "/page/manu-4-3-1"
-          },
-          {
-            name: "manu 4.3.2",
-            url: "/page/manu-4-3-2"
-          },
-          {
-            name: "manu 4.3.3",
-            children: [
-              {
-                name: "manu 4.3.3.1",
-                children: [
-                  {
-                    name: "manu 4.3.3.1.1",
-                    url: "/page/manu-4-3-3-1-1"
-                  }
-                ]
-              },
-              {
-                name: "manu 4.3.3.2",
-                url: "/page/manu-4-3-3-2"
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  }
-]
-
 const defaultValue = savedText || exampleText;
 
 var FileSaver = require('file-saver');
@@ -154,8 +55,6 @@ class App extends React.Component {
     readOnly: false,
     dark: localStorage.getItem("dark") === "enabled",
     value: undefined,
-    file: null,
-    setFile: null
   };
 
   handleToggleReadOnly = () => {
