@@ -25,7 +25,7 @@ struct Pages: Content {
 //     print(error.localizedDescription)
 //    }
     
-    func show(_ command: String, _ path: String) throws -> String {
+    func unixShell(_ command: String, _ path: String) throws -> String {
         let task = Process()
         let pipe = Pipe()
         
