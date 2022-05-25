@@ -20,7 +20,11 @@ export default class ListPages extends React.Component {
         {
           this.state.pages
             .map(person =>
-              <li key={person.id}>{person.name}</li>
+              // <Link to={`${person.url}`} activeClassName="active">{person.name}</Link>,
+              <li>
+                <a href={person.url}>{person.name}</a>
+              </li>
+              // <li key={person.name}>{person.name}</li>
             )
         }
       </ul>
