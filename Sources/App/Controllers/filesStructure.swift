@@ -8,22 +8,25 @@ struct Pages: Content {
 //    var ID: Int
 //    var repo: String
 //    var pages: Array
-    
-//    // Full path to local repository with all .md files
-//    let directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("localRepo")
-//    
-//    // Creating url to new or old file
-//    let fileURL = URL(fileURLWithPath: "fileName", relativeTo: directoryURL).appendingPathExtension("md")
-//    
-//    let myString = "Saving data with FileManager is easy!"
-//    let data = myString.data(using: .utf8)
-//
-//    do {
-//     try data!.write(to: fileURL)
-//     print("File saved: \(fileURL.absoluteURL)")
-//    } catch {
-//     print(error.localizedDescription)
-//    }
+
+    func savePage(_ fileName: String, _ newContent: String) {
+        // Full path to local repository with all .md files
+        let directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("localRepo")
+        
+        // Creating url to new or old file
+        let fileURL = URL(fileURLWithPath: "\(fileName)", relativeTo: directoryURL) //.appendingPathExtension("md")
+        
+        // Updated content from frontend
+        let updatedContent = newContent
+        let data = updatedContent.data(using: .utf8)
+
+        do {
+            try data!.write(to: fileURL)
+            print("File saved: \(fileURL.absoluteURL)")
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
     
     func unixShell(_ command: String, _ path: String) throws -> String {
         let task = Process()
