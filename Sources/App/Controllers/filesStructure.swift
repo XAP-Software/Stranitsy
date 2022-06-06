@@ -28,13 +28,18 @@ struct Pages: Content {
         }
     }
     
-    func unixShell(_ command: String, _ path: String) throws -> String {
+    func unixShell(command: String, option: String?, path: String) throws -> String {
         let task = Process()
         let pipe = Pipe()
         
         task.standardOutput = pipe
         task.standardError = pipe
-        task.arguments = ["-c", "\(command) \(path)"]
+        if option != nil {
+            task.arguments = ["-c", "\(command) \(option!) \(path)"]
+        }
+        else {
+            task.arguments = ["-c", "\(command) \(path)"]
+        }
         task.executableURL = URL(fileURLWithPath: "/bin/zsh") //<--updated
         task.standardInput = nil
 
