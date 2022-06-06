@@ -7,7 +7,8 @@ func routes(_ app: Application) throws {
 
     app.get("list") { req -> [[String : String]] in
         let pages = try req.query.decode(Pages.self)
-        let listPages = try pages.unixShell("ls", "/Users/kl/Desktop/localRepo") // .split(separator: "\n")
+//        let directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("localRepo")
+        let listPages = try pages.unixShell(command: "ls", option: "-R", path: "/Users/kl/Desktop/localRepo/**/*.md") // .split(separator: "\n")
         let JSON = try pages.toJSON(listPages)
         return JSON
     }
@@ -15,9 +16,16 @@ func routes(_ app: Application) throws {
     app.get("list", ":name") { req -> String in
         let content = try req.query.decode(Pages.self)
         let name = req.parameters.get("name")!
-        let showContent = try content.unixShell("cat", "/Users/kl/Desktop/localRepo/\(name).md")
+        let showContent = try content.unixShell(command: "more", option: nil, path: "/Users/kl/Desktop/localRepo/\(name)")
         return showContent
     }
+    
+//    app.post("update", ":name") { req -> String in
+//        let content = try req.query.decode(Pages.self)
+//        let name = req.parameters.get("name")!
+//        let showContent = try content.unixShell(command: "echo", option: ">>", path: "/Users/kl/Desktop/localRepo/\(name)")
+//        return showContent
+//    }
     
     app.get("home") { req -> String in
         return "Hello, world!"
