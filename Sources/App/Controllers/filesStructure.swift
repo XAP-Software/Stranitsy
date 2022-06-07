@@ -54,15 +54,24 @@ struct Pages: Content {
     func toJSON(_ listPages: String) throws -> [[String : String]] {
         var listDicts = [[String: String]]()
         
-        for value in listPages.split(separator: "\n"){
+        for value in listPages.split(separator: "\n") {
             
-            let stringToJSON = ["name": "\(value)", "url": "/\(value)"]
+            let splitedValue = value.split(separator: "/")
+            let firstIndex = splitedValue.firstIndex(of: "localRepo")!
+            let endIndex = splitedValue.endIndex
+            var stringToJSON = [String: String]()
+                
+            if splitedValue[firstIndex + 1 ..< endIndex].count > 1 {
+                stringToJSON["name"] = splitedValue[firstIndex + 1 ..< endIndex].joined(separator: ": ")
+                stringToJSON["url"] = "/\(splitedValue[firstIndex + 1 ..< endIndex].joined(separator: "/"))"
+            }
+            else {
+                stringToJSON = ["name": "\(splitedValue[endIndex - 1])",
+                                "url": "/\(splitedValue[endIndex - 1])"]
+            }
+        
             listDicts.append(stringToJSON)
         }
         return listDicts
     }
-    
-//    func united(_ name: String) throws -> String {
-//        this.pages = this.show(
-//    }
 }

@@ -16,6 +16,7 @@ func routes(_ app: Application) throws {
     app.get("list", ":name") { req -> String in
         let content = try req.query.decode(Pages.self)
         let name = req.parameters.get("name")!
+        print(req.parameters.get("name")!)
         let showContent = try content.unixShell(command: "more", option: nil, path: "/Users/kl/Desktop/localRepo/\(name)")
         return showContent
     }
