@@ -7,8 +7,7 @@ func routes(_ app: Application) throws {
 
     app.get("list") { req -> [[String : String]] in
         let pages = try req.query.decode(Pages.self)
-//        let directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("localRepo")
-        let listPages = try pages.unixShell(command: "ls", option: "-R", path: "/Users/kl/Desktop/localRepo/**/*.md") // .split(separator: "\n")
+        let listPages = try pages.unixShell(command: "ls", option: "-R", path: "/Users/kl/Desktop/localRepo/**/*.md")
         let JSON = try pages.toJSON(listPages)
         return JSON
     }
