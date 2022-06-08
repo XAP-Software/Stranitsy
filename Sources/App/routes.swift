@@ -13,11 +13,10 @@ func routes(_ app: Application) throws {
         return JSON
     }
     
-    app.get("list", ":name") { req -> String in
+    app.get("list", "**") { req -> String in
         let content = try req.query.decode(Pages.self)
-        let name = req.parameters.get("name")!
-        print(req.parameters.get("name")!)
-        let showContent = try content.unixShell(command: "more", option: nil, path: "/Users/kl/Desktop/localRepo/\(name)")
+        let localPath = req.parameters.getCatchall().joined(separator: "/")
+        let showContent = try content.unixShell(command: "more", option: nil, path: "/Users/kl/Desktop/localRepo/\(localPath)")
         return showContent
     }
     
