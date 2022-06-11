@@ -52,25 +52,30 @@ class App extends React.Component {
     value: undefined,
     content: '',
     pages: [],
+    pageName: ''
   };
 
-  componentDidMount () {
-    axios.get(`http://localhost:8080/list`)
+  async componentDidMount () {
+    await axios.get(`http://localhost:8080/list`)
       .then(res => {
         const pages = res.data;
         this.setState({ pages });
       });
     
     console.log(this.state.pages);
+
+    // POST request using axios with async/await
   }
 
-  showContent (page) {
-    axios.get(`http://localhost:8080/list${page}`)
+  async showContent (page) {
+    await axios.get(`http://localhost:8080/list${page}`)
       .then(res => {
         var content = res.data;
         if (res.data === '') content = exampleText;
         this.setState({ content })
       });
+    var pageName = page;
+    this.setState({ pageName })
   }
 
   handleToggleReadOnly = () => {
@@ -92,16 +97,20 @@ class App extends React.Component {
     this.setState({ value });
   };
 
-  handleChange = debounce(value => {
+  // Write file contents to local storage and upload to server for update
+  handleChange = debounce(async value => {
     const text = value();
-    console.log(text);
     localStorage.setItem("saved", text);
-  }, 250);
+
+    const content = { content: text};
+    console.log(this.state.pageName)
+    const response = await axios.post(`http://localhost:8080/list/${this.state.pageName}`, content);
+    this.setState({ contentId: response.data.id });
+  }, 1000);
 
   render() {
     const { body } = document;
     if (body) body.style.backgroundColor = this.state.dark ? "#181A1B" : "#FFF";
-    // console.log(this.state.content)
     console.log(localStorage)
 
     return (
@@ -117,9 +126,7 @@ class App extends React.Component {
                 {
                   this.state.pages?.map(page => 
                     <li key={page.name}>
-                      {/* <button className='ul-button' onClick={() => {this.showContent(page.url)}}> */}
-                          <Link className='a-sidebar' onClick={() => {this.showContent(page.url)}} to={page.url}>{page.name}</Link>
-                      {/* </button> */}
+                      <Link className='a-sidebar' onClick={() => {this.showContent(page.url)}} to={page.url}>{page.name}</Link>
                     </li>
                     )
                 }

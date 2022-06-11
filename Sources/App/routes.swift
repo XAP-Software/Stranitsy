@@ -1,32 +1,36 @@
 import Vapor
 
 func routes(_ app: Application) throws {
-    app.get { req in
-        return "It works!"
-    }
 
-    app.get("list") { req -> [[String : String]] in
+    let pages = app.grouped("list")
+
+    pages.get { req -> [[String : String]] in
         let pages = try req.query.decode(Pages.self)
-        let listPages = try pages.unixShell(command: "ls", option: "-R", path: "/Users/kl/Desktop/localRepo/**/*.md")
-        let JSON = try pages.toJSON(listPages)
+        let pathToFile = "/Users/kl/Desktop/localRepo/**/*.md"
+        // let addPath = Pages(path: pathToFile)
+        let getListPages = try pages.unixShell(command: "ls", option: "-R", path: pathToFile)
+        let JSON = try pages.toJSON(getListPages)
         return JSON
     }
     
-    app.get("list", "**") { req -> String in
+    pages.get("**") { req -> String in
         let content = try req.query.decode(Pages.self)
         let localPath = req.parameters.getCatchall().joined(separator: "/")
-        let showContent = try content.unixShell(command: "more", option: nil, path: "/Users/kl/Desktop/localRepo/\(localPath)")
+        let fullPath = "/Users/kl/Desktop/localRepo/\(localPath)"
+        // let addPath = Pages(path: fullPath)
+        let showContent = try content.unixShell(command: "more", option: nil, path: fullPath)
         return showContent
     }
     
-//    app.post("update", ":name") { req -> String in
-//        let content = try req.query.decode(Pages.self)
-//        let name = req.parameters.get("name")!
-//        let showContent = try content.unixShell(command: "echo", option: ">>", path: "/Users/kl/Desktop/localRepo/\(name)")
-//        return showContent
-//    }
-    
-    app.get("home") { req -> String in
-        return "Hello, world!"
+    pages.post("**") { req -> String in
+        let data = try req.content.decode(ContentOfPage.self)
+        let pageName = req.parameters.getCatchall().joined(separator: "/")
+        let fullPath = "/Users/kl/Desktop/localRepo/\(pageName)"
+        let pages = Pages()
+        let _ = try pages.unixShell(command: "echo", option: """
+                                                                -e "\(data.content)" | tee
+                                                                """, path: fullPath)
+
+        return "Page has been saved!" // return http status code about saving file
     }
 }

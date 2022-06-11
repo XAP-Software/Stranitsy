@@ -7,7 +7,7 @@ struct Pages: Content {
 //    var path: String
 //    var ID: Int
 //    var repo: String
-//    var pages: Array
+//    var pages: [[String : String]]
 
     func savePage(_ fileName: String, _ newContent: String) {
         // Full path to local repository with all .md files
@@ -74,4 +74,8 @@ struct Pages: Content {
         }
         return listDicts
     }
+}
+
+struct ContentOfPage: Content {
+    var content: String
 }
