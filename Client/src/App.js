@@ -14,37 +14,26 @@ const savedText = localStorage.getItem("saved");
 
 const exampleText = `
 # Hello this is example text
-
 ## H2
-
 ### H3
-
 #### H4
-
 This is a markdown paragraph.
-
 - unordered lists
 - lists
 [this is a link](google.com)
 1. numbered
 2. lists
-
 \`\`\`
 const foo = 'foo'; // code
 \`\`\`
-
 ---
-
 `;
+
+let host = 'http://' + window.location.hostname + ':8080';
 
 const defaultValue = savedText || exampleText;
 
 class App extends React.Component {
-
-  constructor() {
-    super();
-    this.state = {file: ''};
-  }
 
   state = {
     readOnly: false,
@@ -56,7 +45,7 @@ class App extends React.Component {
   };
 
   async componentDidMount () {
-    await axios.get(`http://localhost:8080/list`)
+    await axios.get(`${host}/list`)
       .then(res => {
         const pages = res.data;
         this.setState({ pages });
@@ -68,7 +57,7 @@ class App extends React.Component {
   }
 
   async showContent (page) {
-    await axios.get(`http://localhost:8080/list${page}`)
+    await axios.get(`${host}/list${page}`)
       .then(res => {
         var content = res.data;
         if (res.data === '') content = exampleText;
@@ -104,14 +93,15 @@ class App extends React.Component {
 
     const content = { content: text};
     console.log(this.state.pageName)
-    const response = await axios.post(`http://localhost:8080/list/${this.state.pageName}`, content);
+    const response = await axios.post(`${host}/list/${this.state.pageName}`, content);
     this.setState({ contentId: response.data.id });
   }, 1000);
 
   render() {
     const { body } = document;
     if (body) body.style.backgroundColor = this.state.dark ? "#181A1B" : "#FFF";
-    console.log(localStorage)
+    console.log(this.state.pages)
+    console.log(12)
 
     return (
       <div>
@@ -124,7 +114,7 @@ class App extends React.Component {
             <BrowserRouter>
               <ul>
                 {
-                  this.state.pages?.map(page => 
+                  this.state.pages.map(page => 
                     <li key={page.name}>
                       <Link className='a-sidebar' onClick={() => {this.showContent(page.url)}} to={page.url}>{page.name}</Link>
                     </li>
