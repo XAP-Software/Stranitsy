@@ -16,8 +16,8 @@ func routes(_ app: Application) throws {
     // Getting page content
     pages.get("**") { req -> String in
         let content = try req.query.decode(ActionWithPages.self)
-        let fullPath = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
-        let filePath = "/Users/kl/Desktop/localRepo/\(fullPath)"
+        let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
+        let filePath = "/Users/kl/Desktop/localRepo/\(pageName)"
         let showContent = try content.unixShell(command: "more", option: nil, path: filePath)
         return showContent
     }
@@ -25,7 +25,7 @@ func routes(_ app: Application) throws {
     // Saving modified page content
     pages.post("**") { req -> HTTPStatus in
         let pageContent = try req.content.decode(PageContent.self)
-        let pageName = req.parameters.getCatchall().joined(separator: "/")
+        let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
         let fullPath = "/Users/kl/Desktop/localRepo/\(pageName)"
         let pagesActns = ActionWithPages()
         let _ = try pagesActns.unixShell(command: "echo", option: """
@@ -35,6 +35,7 @@ func routes(_ app: Application) throws {
         return .ok
     }
 
+    // Creating new page
     pages.post("createPage") { req -> HTTPStatus in 
         let pageParams = try req.content.decode(PageParams.self)
         let pagesActns = ActionWithPages()
