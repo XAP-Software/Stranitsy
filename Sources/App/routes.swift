@@ -5,32 +5,46 @@ func routes(_ app: Application) throws {
     let pages = app.grouped("list")
 
     pages.get { req -> [[String : String]] in
-        let pages = try req.query.decode(Pages.self)
+        let pagesActns = try req.query.decode(ActionWithPages.self)
         let pathToFile = "/Users/kl/Desktop/localRepo/**/*.md"
-        // let addPath = Pages(path: pathToFile)
-        let getListPages = try pages.unixShell(command: "ls", option: "-R", path: pathToFile)
-        let JSON = try pages.toJSON(getListPages)
+        let getListPages = try pagesActns.unixShell(command: "ls", option: "-R", path: pathToFile)
+        let JSON = try pagesActns.toJSON(getListPages)
         return JSON
     }
     
     pages.get("**") { req -> String in
-        let content = try req.query.decode(Pages.self)
+        let content = try req.query.decode(ActionWithPages.self)
         let localPath = req.parameters.getCatchall().joined(separator: "/")
         let fullPath = "/Users/kl/Desktop/localRepo/\(localPath)"
-        // let addPath = Pages(path: fullPath)
         let showContent = try content.unixShell(command: "more", option: nil, path: fullPath)
         return showContent
     }
     
-    pages.post("**") { req -> String in
-        let data = try req.content.decode(ContentOfPage.self)
+    pages.post("**") { req -> HTTPStatus in
+        let pageContent = try req.content.decode(PageContent.self)
         let pageName = req.parameters.getCatchall().joined(separator: "/")
         let fullPath = "/Users/kl/Desktop/localRepo/\(pageName)"
-        let pages = Pages()
-        let _ = try pages.unixShell(command: "echo", option: """
-                                                                -e "\(data.content)" | tee
-                                                                """, path: fullPath)
+        let pagesActns = ActionWithPages()
+        let _ = try pagesActns.unixShell(command: "echo", option: """
+                                                                  -e "\(pageContent.content)" | tee
+                                                                  """, path: fullPath)
 
-        return "Page has been saved!" // return http status code about saving file
+        return .ok
+    }
+
+    pages.post("createPage") { req -> HTTPStatus in 
+        let pageParams = try req.content.decode(PageParams.self)
+        let pagesActns = ActionWithPages()
+        let fullPath = "/Users/kl/Desktop/localRepo/"
+        let _ = try pagesActns.unixShell(command: "echo", option: """
+                                                                        "---
+
+                                                                        ID: \(pageParams.ID)
+                                                                        title: \(pageParams.title)
+                                                                        user: \(pageParams.userName)
+
+                                                                        ---"
+                                                                        """, path: "> \(fullPath)\(pageParams.title).md")
+        return .ok
     }
 }

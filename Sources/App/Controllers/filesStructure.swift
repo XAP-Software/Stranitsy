@@ -1,32 +1,7 @@
 import Foundation
 import Vapor
 
-struct Pages: Content {
-//    var name: String
-//    var content: String
-//    var path: String
-//    var ID: Int
-//    var repo: String
-//    var pages: [[String : String]]
-
-    func savePage(_ fileName: String, _ newContent: String) {
-        // Full path to local repository with all .md files
-        let directoryURL = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0].appendingPathComponent("localRepo")
-        
-        // Creating url to new or old file
-        let fileURL = URL(fileURLWithPath: "\(fileName)", relativeTo: directoryURL) //.appendingPathExtension("md")
-        
-        // Updated content from frontend
-        let updatedContent = newContent
-        let data = updatedContent.data(using: .utf8)
-
-        do {
-            try data!.write(to: fileURL)
-            print("File saved: \(fileURL.absoluteURL)")
-        } catch {
-            print(error.localizedDescription)
-        }
-    }
+struct ActionWithPages: Content {
     
     func unixShell(command: String, option: String?, path: String) throws -> String {
         let task = Process()
@@ -76,6 +51,17 @@ struct Pages: Content {
     }
 }
 
-struct ContentOfPage: Content {
+struct PageContent: Content {
     var content: String
+}
+
+
+struct PageParams: Content {
+    var title: String
+    var userName: String // after setting up authorizations change on Users
+    var ID: String {
+        get {
+            return UUID().uuidString
+        }
+    }
 }
