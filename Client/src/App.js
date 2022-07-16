@@ -4,6 +4,7 @@ import Editor from "rich-markdown-editor";
 import { StyledEditor } from './components/editor';
 import { debounce } from "lodash";
 import axios from 'axios';
+import CreatePage from './components/CreatePage';
 // import { parse } from 'jekyll-markdown-parser';
 import { 
   BrowserRouter,
@@ -50,8 +51,6 @@ class App extends React.Component {
         const pages = res.data;
         this.setState({ pages });
       });
-    
-    console.log(this.state.pages);
 
     // POST request using axios with async/await
   }
@@ -59,12 +58,12 @@ class App extends React.Component {
   async showContent (page) {
     await axios.get(`${host}/list${page}`)
       .then(res => {
-        var content = res.data;
+        let content = res.data;
         if (res.data === '') content = exampleText;
         this.setState({ content })
       });
-    var pageName = page;
-    this.setState({ pageName })
+    let pageName = page;
+    this.setState({ pageName });
   }
 
   handleToggleReadOnly = () => {
@@ -100,8 +99,6 @@ class App extends React.Component {
   render() {
     const { body } = document;
     if (body) body.style.backgroundColor = this.state.dark ? "#181A1B" : "#FFF";
-    console.log(this.state.pages)
-    console.log(12)
 
     return (
       <div>
@@ -118,7 +115,7 @@ class App extends React.Component {
                     <li key={page.name}>
                       <Link className='a-sidebar' onClick={() => {this.showContent(page.url)}} to={page.url}>{page.name}</Link>
                     </li>
-                    )
+                  )
                 }
               </ul>
             </BrowserRouter>
@@ -127,6 +124,7 @@ class App extends React.Component {
             <div className='space-button'>
               <div className='editing-buttons'>
                 <br />
+                <CreatePage/>
                 <button type="button" onClick={this.handleToggleReadOnly}>
                   {this.state.readOnly ? "Editable" : "Read only"}
                 </button>{" "}
