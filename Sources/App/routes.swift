@@ -4,6 +4,7 @@ func routes(_ app: Application) throws {
 
     let pages = app.grouped("list")
 
+    // Getting a list of pages
     pages.get { req -> [[String : String]] in
         let pagesActns = try req.query.decode(ActionWithPages.self)
         let pathToFile = "/Users/kl/Desktop/localRepo/**/*.md"
@@ -12,14 +13,16 @@ func routes(_ app: Application) throws {
         return JSON
     }
     
+    // Getting page content
     pages.get("**") { req -> String in
         let content = try req.query.decode(ActionWithPages.self)
-        let localPath = req.parameters.getCatchall().joined(separator: "/")
-        let fullPath = "/Users/kl/Desktop/localRepo/\(localPath)"
-        let showContent = try content.unixShell(command: "more", option: nil, path: fullPath)
+        let fullPath = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
+        let filePath = "/Users/kl/Desktop/localRepo/\(fullPath)"
+        let showContent = try content.unixShell(command: "more", option: nil, path: filePath)
         return showContent
     }
     
+    // Saving modified page content
     pages.post("**") { req -> HTTPStatus in
         let pageContent = try req.content.decode(PageContent.self)
         let pageName = req.parameters.getCatchall().joined(separator: "/")
