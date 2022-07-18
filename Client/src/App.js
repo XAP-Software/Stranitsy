@@ -42,7 +42,7 @@ class App extends React.Component {
     value: undefined,
     content: '',
     pages: [],
-    pageName: ''
+    pageName: '',
   };
 
   async componentDidMount () {
@@ -64,6 +64,13 @@ class App extends React.Component {
       });
     let pageName = page;
     this.setState({ pageName });
+  }
+
+  deletePage (page) {
+    axios.delete(`${host}/list${page}`)
+      .then(() =>
+          this.setState({ status: "Страница удалена" })
+      );
   }
 
   handleToggleReadOnly = () => {
@@ -126,13 +133,16 @@ class App extends React.Component {
                 <br />
                 <CreatePage/>
                 <button type="button" onClick={this.handleToggleReadOnly}>
-                  {this.state.readOnly ? "Editable" : "Read only"}
+                  {this.state.readOnly ? "Редактировать" : "Только для чтения"}
                 </button>{" "}
                 <button type="button" onClick={this.handleToggleDark}>
-                  {this.state.dark ? "Light theme" : "Dark theme"}
+                  {this.state.dark ? "Светлая тема" : "Темная тема"}
                 </button>{" "}
                 <button type="button" onClick={this.handleSaveValue}>
-                  Update value
+                  Сохранить
+                </button>{" "}
+                <button type="button" onClick={() => {this.deletePage(this.state.pageName)}}>
+                  Удалить страницу
                 </button>
               </div>
               <br />

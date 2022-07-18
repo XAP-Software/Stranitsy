@@ -45,5 +45,5 @@ export default class CreatePage extends React.Component {
             </form>
           </div>
         )
-      }
+    }
 }
