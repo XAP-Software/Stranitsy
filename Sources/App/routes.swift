@@ -48,7 +48,16 @@ func routes(_ app: Application) throws {
                                                                         user: \(pageParams.userName)
 
                                                                         ---"
-                                                                        """, path: "> \(fullPath)\(pageParams.title).md")
+                                                                        """, path: "> \(fullPath)\(pageParams.ID).md")
+        return .ok
+    }
+
+    pages.delete("**") { req -> HTTPStatus in 
+        let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
+        let pagesActns = ActionWithPages()
+        let fullPath = "/Users/kl/Desktop/localRepo/\(pageName)"
+        let _ = try pagesActns.unixShell(command: "rm", option: nil, path: fullPath)
+
         return .ok
     }
 }
