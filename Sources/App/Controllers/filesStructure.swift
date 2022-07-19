@@ -28,25 +28,27 @@ struct ActionWithPages: Content {
     
     func toJSON(_ listPages: String) throws -> [[String : String]] {
         var listDicts = [[String: String]]()
-        
+        var stringToJSON = [String: String]()
+
         for value in listPages.split(separator: "\n") {
             
             let splitedValue = value.split(separator: "/")
-            let firstIndex = splitedValue.firstIndex(of: ".stranitsy")!
-            let endIndex = splitedValue.endIndex
-            var stringToJSON = [String: String]()
+
+            let firstIndexs = splitedValue.firstIndex(where: {$0 == ".stranitsy"})!
+            let pathToFile = splitedValue[firstIndexs + 1 ..< splitedValue.endIndex]
                 
-            if splitedValue[firstIndex + 1 ..< endIndex].count > 1 {
-                stringToJSON["name"] = splitedValue[firstIndex + 1 ..< endIndex].joined(separator: ": ")
-                stringToJSON["url"] = "/\(splitedValue[firstIndex + 1 ..< endIndex].joined(separator: "/"))"
+            if pathToFile.count > 1 {
+                stringToJSON["name"] = "\(pathToFile.count)"
+                stringToJSON["url"] = "/\(pathToFile.joined(separator: "/"))"
             }
             else {
-                stringToJSON = ["name": "\(splitedValue[endIndex - 1])",
-                                "url": "/\(splitedValue[endIndex - 1])"]
+                stringToJSON = ["name": "\(pathToFile.last!)",
+                                "url": "/\(pathToFile.last!)"]
             }
-        
+
             listDicts.append(stringToJSON)
         }
+
         return listDicts
     }
 }
@@ -55,11 +57,12 @@ struct PageContent: Content {
     var content: String
 }
 
-
 struct PageParams: Content {
     var title: String
     var userName: String // after setting up authorizations change on Users
-    // var parentID: String
+    var level: String
+    var sNumber: String
+    var parentID: String? = nil
     var ID: String {
         get {
             return UUID().uuidString

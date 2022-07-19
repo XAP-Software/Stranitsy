@@ -38,7 +38,7 @@ func routes(_ app: Application) throws {
 
     // Creating new page
     pages.post("createPage") { req -> HTTPStatus in 
-        let pageParams = try req.content.decode(PageParams.self)
+        var pageParams = try req.content.decode(PageParams.self)
         let pagesActns = ActionWithPages()
         let fullPath = "\(directoryURL)/"
         let _ = try pagesActns.unixShell(command: "echo", option: """
@@ -47,6 +47,9 @@ func routes(_ app: Application) throws {
                                                                         ID: \(pageParams.ID)
                                                                         title: \(pageParams.title)
                                                                         user: \(pageParams.userName)
+                                                                        level: \(pageParams.level)
+                                                                        serialNumber: \(pageParams.sNumber)
+                                                                        parentID: \(pageParams.parentID = nil)
 
                                                                         ---"
                                                                         """, path: "> \(fullPath)\(pageParams.ID).md")
