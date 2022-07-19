@@ -32,7 +32,7 @@ struct ActionWithPages: Content {
         for value in listPages.split(separator: "\n") {
             
             let splitedValue = value.split(separator: "/")
-            let firstIndex = splitedValue.firstIndex(of: "localRepo")!
+            let firstIndex = splitedValue.firstIndex(of: ".stranitsy")!
             let endIndex = splitedValue.endIndex
             var stringToJSON = [String: String]()
                 
@@ -59,6 +59,7 @@ struct PageContent: Content {
 struct PageParams: Content {
     var title: String
     var userName: String // after setting up authorizations change on Users
+    // var parentID: String
     var ID: String {
         get {
             return UUID().uuidString

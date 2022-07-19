@@ -2,12 +2,13 @@ import Vapor
 
 func routes(_ app: Application) throws {
 
+    let directoryURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
     let pages = app.grouped("list")
 
     // Getting a list of pages
     pages.get { req -> [[String : String]] in
         let pagesActns = try req.query.decode(ActionWithPages.self)
-        let pathToFile = "/Users/kl/Desktop/localRepo/**/*.md"
+        let pathToFile = "\(directoryURL)/**/*.md"
         let getListPages = try pagesActns.unixShell(command: "ls", option: "-R", path: pathToFile)
         let JSON = try pagesActns.toJSON(getListPages)
         return JSON
@@ -17,7 +18,7 @@ func routes(_ app: Application) throws {
     pages.get("**") { req -> String in
         let content = try req.query.decode(ActionWithPages.self)
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
-        let filePath = "/Users/kl/Desktop/localRepo/\(pageName)"
+        let filePath = "\(directoryURL)/\(pageName)"
         let showContent = try content.unixShell(command: "more", option: nil, path: filePath)
         return showContent
     }
@@ -26,7 +27,7 @@ func routes(_ app: Application) throws {
     pages.post("**") { req -> HTTPStatus in
         let pageContent = try req.content.decode(PageContent.self)
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
-        let fullPath = "/Users/kl/Desktop/localRepo/\(pageName)"
+        let fullPath = "\(directoryURL)/\(pageName)"
         let pagesActns = ActionWithPages()
         let _ = try pagesActns.unixShell(command: "echo", option: """
                                                                   -e "\(pageContent.content)" | tee
@@ -39,7 +40,7 @@ func routes(_ app: Application) throws {
     pages.post("createPage") { req -> HTTPStatus in 
         let pageParams = try req.content.decode(PageParams.self)
         let pagesActns = ActionWithPages()
-        let fullPath = "/Users/kl/Desktop/localRepo/"
+        let fullPath = "\(directoryURL)/"
         let _ = try pagesActns.unixShell(command: "echo", option: """
                                                                         "---
 
@@ -55,7 +56,7 @@ func routes(_ app: Application) throws {
     pages.delete("**") { req -> HTTPStatus in 
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
         let pagesActns = ActionWithPages()
-        let fullPath = "/Users/kl/Desktop/localRepo/\(pageName)"
+        let fullPath = "\(directoryURL)/\(pageName)"
         let _ = try pagesActns.unixShell(command: "rm", option: nil, path: fullPath)
 
         return .ok
