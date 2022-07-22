@@ -7,29 +7,38 @@ func routes(_ app: Application) throws {
 
     // Getting a list of pages
     pages.get { req -> [[String : String]] in
-        let pagesActns = try req.query.decode(ActionWithPages.self)
+        let shellController = ShellController()
+        let convert = ConversionToJSON()
+
         let pathToFile = "\(directoryURL)/**/*.md"
-        let getListPages = try pagesActns.unixShell(command: "ls", option: "-R", path: pathToFile)
-        let JSON = try pagesActns.toJSON(getListPages)
+
+        let getListPages = try shellController.unixCommand(command: "ls", option: "-R", path: pathToFile)
+        let JSON = try convert.toJSON(getListPages)
+
         return JSON
     }
     
     // Getting page content
     pages.get("**") { req -> String in
-        let content = try req.query.decode(ActionWithPages.self)
+        let content = ShellController()
+
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
         let filePath = "\(directoryURL)/\(pageName)"
-        let showContent = try content.unixShell(command: "more", option: nil, path: filePath)
+
+        let showContent = try content.unixCommand(command: "more", option: nil, path: filePath)
+
         return showContent
     }
     
     // Saving modified page content
     pages.post("**") { req -> HTTPStatus in
         let pageContent = try req.content.decode(PageContent.self)
+        let pagesActns = ShellController()
+
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
         let fullPath = "\(directoryURL)/\(pageName)"
-        let pagesActns = ActionWithPages()
-        let _ = try pagesActns.unixShell(command: "echo", option: """
+
+        let _ = try pagesActns.unixCommand(command: "echo", option: """
                                                                   -e "\(pageContent.content)" | tee
                                                                   """, path: fullPath)
 
@@ -39,9 +48,9 @@ func routes(_ app: Application) throws {
     // Creating new page
     pages.post("createPage") { req -> HTTPStatus in 
         var pageParams = try req.content.decode(PageParams.self)
-        let pagesActns = ActionWithPages()
+        let pagesActns = ShellController()
         let fullPath = "\(directoryURL)/"
-        let _ = try pagesActns.unixShell(command: "echo", option: """
+        let _ = try pagesActns.unixCommand(command: "echo", option: """
                                                                         "---
 
                                                                         ID: \(pageParams.ID)
@@ -57,10 +66,12 @@ func routes(_ app: Application) throws {
     }
 
     pages.delete("**") { req -> HTTPStatus in 
+        let pagesActns = ShellController()
+
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
-        let pagesActns = ActionWithPages()
         let fullPath = "\(directoryURL)/\(pageName)"
-        let _ = try pagesActns.unixShell(command: "rm", option: nil, path: fullPath)
+
+        let _ = try pagesActns.unixCommand(command: "rm", option: nil, path: fullPath)
 
         return .ok
     }
