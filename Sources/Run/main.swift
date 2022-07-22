@@ -5,30 +5,38 @@ import Dispatch
 
 #if DEBUG
 
-print("This never gets printed")
+print("Starting application in DEBUG mode")
 
-func asyncRun () async throws {
+let shellController = ShellController()
+
+let concurrentQueue = DispatchQueue(label: "swiftlee.concurrent.queue", attributes: .concurrent)
+
+// Frontend is executed asyncronously
+concurrentQueue.async {
+    let feLog = try! shellController.unixCommand(command: "cd `pwd`/Client/", option: nil, path: "&& yarn start")
+    print(feLog)
+    // FIXME: log is only being printed after application shutdown
+}
+
+// Backend is executed asyncronously
+concurrentQueue.async {
     let app = Application()
-    async let shellController = ShellController()
-
-    try configure(app)
-    let _ = try await shellController.unixCommand("cd `pwd`/Client/", path: "&& yarn start")
-    try app.run()
+    try! configure(app)
+    try! app.run()
+    
+    // Catch Ctr+C for application shutdown
     app.shutdown()
-    print("before")
+    
+    // Kill frontend that was started in another thread
+    print(try! shellController.unixCommand(command: "kill -9 `lsof -t -i :3000`", option: nil, path: ""))
+    
+    // Stop program execution
+    exit(0)
 }
-
-func executeAsyncRun () {
-    Task.detached {
-        try await asyncRun()
-    }
-}
-
-executeAsyncRun ()
 
 #else
 
-print("this always executes instead")
+print("Starting application in Production mode")
 var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 let app = Application(env)
