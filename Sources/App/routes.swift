@@ -12,8 +12,8 @@ func routes(_ app: Application) throws {
 
         let pathToFile = "\(directoryURL)/**/*.md"
 
-        let getListPages = try shellController.unixCommand(command: "ls", option: "-R", path: pathToFile)
-        let JSON = try convert.toJSON(getListPages)
+        let listPages = try shellController.unixCommand(command: "ls", option: "-R", path: pathToFile)
+        let JSON = try convert.toJSON(listPages)
 
         return JSON
     }
@@ -36,11 +36,11 @@ func routes(_ app: Application) throws {
         let pagesActns = ShellController()
 
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
-        let fullPath = "\(directoryURL)/\(pageName)"
+        let filePath = "\(directoryURL)/\(pageName)"
 
         let _ = try pagesActns.unixCommand(command: "echo", option: """
                                                                   -e "\(pageContent.content)" | tee
-                                                                  """, path: fullPath)
+                                                                  """, path: filePath)
 
         return .ok
     }
@@ -55,7 +55,7 @@ func routes(_ app: Application) throws {
 
                                                                         ID: \(pageParams.ID)
                                                                         title: \(pageParams.title)
-                                                                        user: \(pageParams.userName)
+                                                                        userName: \(pageParams.userName)
                                                                         level: \(pageParams.level)
                                                                         serialNumber: \(pageParams.sNumber)
                                                                         parentID: \(pageParams.parentID = nil)
