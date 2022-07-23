@@ -4,16 +4,14 @@ final class Page: Model {
     // Name of the table or collection.
     static let schema = "page"
 
-    // Unique identifier for this Page.
-    @ID(key: .id)
-    var id: UUID?
+    @ID(key: .ID)
+    var ID: UUID
 
-    // The Page's title.
     @Field(key: "title")
     var title: String
     
     @Field(key: "userName")
-    var userName: String
+    var userName: User.login
 
     @Field(key: "level")
     var level: String
@@ -21,18 +19,17 @@ final class Page: Model {
     @Field(key: "serialNumber")
     var serialNumber: String
 
-    // The Page's parentID.
     @Field(key: "parentID")
-    var title: String
+    var parentID: UUID?
 
     // Creates a new, empty Page.
     init() { }
 
     // Creates a new Page with all properties set.
-    init(id: UUID? = nil, title: String) {
+    init(ID: UUID, title: String, userName: User.login, level: String, serialNumber: String, parentID: UUID? = nil) {
         self.ID = ID
         self.title = title
-        self.userName = userName
+        self.userName = User.login
         self.level = level
         self.serialNumber = serialNumber
         self.parentID = parentID
