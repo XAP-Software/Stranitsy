@@ -1,37 +1,33 @@
-import Fluent
+import Foundation
 
-final class Page: Model {
-    // Name of the table or collection.
-    static let schema = "page"
+struct Page {
 
-    @ID(key: .ID)
-    var ID: UUID
-
-    @Field(key: "title")
+    // Main parameters in page
+    let ID: UUID
     var title: String
-    
-    @Field(key: "userName")
-    var userName: User.login
+    var content: String?
 
-    @Field(key: "level")
-    var level: String
-    
-    @Field(key: "serialNumber")
-    var serialNumber: String
+    // User data as a page parameters
+    let createdBy: User
+    var lastChangedBy: User
+    var authorizedToChange: [User]
+    var authorizedToView: [User]
 
-    @Field(key: "parentID")
-    var parentID: UUID?
+    // Parents and children data page
+    var parentPageID: UUID?
+    var childPageIDs: [UUID]
 
-    // Creates a new, empty Page.
-    init() { }
-
-    // Creates a new Page with all properties set.
-    init(ID: UUID, title: String, userName: User.login, level: String, serialNumber: String, parentID: UUID? = nil) {
-        self.ID = ID
-        self.title = title
-        self.userName = User.login
-        self.level = level
-        self.serialNumber = serialNumber
-        self.parentID = parentID
+    public static func create(title: String, content: String? = nil, createdBy: User, parentPage: UUID?) -> Page {
+        let id = UUID()
+        let page = Page(ID: id, 
+                               title: title, 
+                               content: content, 
+                               createdBy: createdBy, 
+                               lastChangedBy: createdBy, 
+                               authorizedToChange: [createdBy], 
+                               authorizedToView: [createdBy], 
+                               parentPageID: parentPage, 
+                               childPageIDs: [UUID]())
+        return page
     }
 }
