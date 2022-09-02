@@ -8,12 +8,12 @@
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "public": "icons8-puzzle-16.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "public": "icons8-puzzle-16.png",
       "type": "image/png",
       "sizes": "512x512"
     }
