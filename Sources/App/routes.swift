@@ -3,23 +3,36 @@ import Vapor
 func routes(_ app: Application) throws {
 
     let directoryURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
+    let pagesParameters = PagesParameters()
     let pages = app.grouped("list")
 
     // Getting a list of pages
-    pages.get { req -> [[String : String]] in
-        let shellController = ShellController()
-        let convert = ConversionToJSON()
+    pages.get { req -> String in
+        let getListPages = try pagesParameters.getPageParameters(command: "list")
 
-        let pathToFile = "\(directoryURL)/**/*.md"
+        let jsonEncoder = JSONEncoder()
+        let jsonData = try jsonEncoder.encode(getListPages)
+        let JSON = String(data: jsonData, encoding: String.Encoding.utf8)
 
-        let listPages = try shellController.unixCommand(command: "ls", option: "-R", path: pathToFile)
-        let JSON = try convert.toJSON(listPages)
+        return JSON!
+    }
 
-        return JSON
+    // Getting a list of pages from directory
+    pages.get("**") { req -> String in 
+        let directoryName = req.parameters.getCatchall()[0]
+        print(directoryName)
+
+        let getListPages = try pagesParameters.getPageParameters(command: "listPagesFromDirectory", directory: directoryName)
+
+        let jsonEncoder = JSONEncoder()
+        let jsonData = try jsonEncoder.encode(getListPages)
+        let JSON = String(data: jsonData, encoding: String.Encoding.utf8)
+
+        return JSON!
     }
     
     // Getting page content
-    pages.get("**") { req -> String in
+    pages.get("blob", "main", "**") { req -> String in
         let content = ShellController()
 
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")

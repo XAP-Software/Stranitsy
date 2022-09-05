@@ -13,7 +13,7 @@ let concurrentQueue = DispatchQueue(label: "swiftlee.concurrent.queue", attribut
 
 // Frontend is executed asyncronously
 concurrentQueue.async {
-    let feLog = try! shellController.unixCommand(command: "cd `pwd`/Client/", option: nil, path: "&& yarn start")
+    let feLog = try! shellController.unixCommand(command: "cd ~/Stranitsy/Client/", option: nil, path: "&& yarn start")
     print(feLog)
     // FIXME: log is only being printed after application shutdown
 }
