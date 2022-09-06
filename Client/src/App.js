@@ -55,21 +55,32 @@ class App extends React.Component {
     // POST request using axios with async/await
   }
 
+  async showPagesInDirectory (directory) {
+    await axios.get(`${host}/list/${directory}`)
+      .then(res => {
+        const pages = res.data;
+        this.setState({ pages })
+      })
+  }
+
   async showContent (page) {
-    await axios.get(`${host}/list${page}`)
+    await axios.get(`${host}/list/blob/main/${page}`)
       .then(res => {
         let content = res.data;
-        if (res.data === '') content = exampleText;
-        this.setState({ content })
+        if (content.includes("is a directory")) this.showPagesInDirectory(content.match(/[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}/))
+        else {
+          if (content === '') content = exampleText;
+          this.setState({ content })
+        }
       });
     let pageName = page;
     this.setState({ pageName });
   }
 
   deletePage (page) {
-    axios.delete(`${host}/list${page}`)
+    axios.delete(`${host}/list/blob/main/${page}`)
       .then(() =>
-          this.setState({ status: "Страница удалена" })
+        this.setState({ status: "Страница удалена" })
       );
   }
 
@@ -77,12 +88,14 @@ class App extends React.Component {
     this.setState({ readOnly: !this.state.readOnly });
   };
 
+  // Changing theme
   handleToggleDark = () => {
     const dark = !this.state.dark;
     this.setState({ dark });
     localStorage.setItem("dark", dark ? "enabled" : "disabled");
   };
 
+  // Write text to local storage
   handleSaveValue = () => {
     const existing = localStorage.getItem("saved") || "";
     const value = `${existing}`;
@@ -118,9 +131,9 @@ class App extends React.Component {
             <BrowserRouter>
               <ul>
                 {
-                  this.state.pages.map(page => 
-                    <li key={page.name}>
-                      <Link className='a-sidebar' onClick={() => {this.showContent(page.url)}} to={page.url}>{page.name}</Link>
+                  Object.keys(this.state.pages).map(page => 
+                    <li key={page}>
+                      <Link className='a-sidebar' onClick={() => {this.showContent(page)}} to={page}>{this.state.pages[page]}</Link>
                     </li>
                   )
                 }
