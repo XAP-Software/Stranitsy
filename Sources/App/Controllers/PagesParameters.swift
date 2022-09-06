@@ -6,39 +6,35 @@ struct PagesParameters: Codable {
         let shellController = ShellController()
         let rootDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
 
-        let titlePagesFromBash: String
-        let directories: String
+        let pathInsideApp: String
 
         if directory == nil {
-            titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title':", option: nil, path: "\(rootDirectory)/*.md")
-            directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(rootDirectory)/*/")
+            pathInsideApp = "./"
         } else {
-            titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title':", option: nil, path: "\(rootDirectory)/\(directory!)/*.md")
-            directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(rootDirectory)/\(directory!)/*/")
+            pathInsideApp = directory! + "/"
         }
 
-        let arrayPages = titlePagesFromBash.split(separator: "\n")
-        let arrayDirestories = directories.split(separator: "\n")
+        let titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title':", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md")
+        let directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(rootDirectory)/\(pathInsideApp)*/")
+        
+        var arrayPages = titlePagesFromBash.split(separator: "\n")
+        var arrayDirestories = directories.split(separator: "\n")
 
         switch command {
             case "listPagesFromDirectory":
-                var processedPageTitles: [String: String] = [:]
+                let processedPageTitles: [String: String] = [:]
 
-                guard arrayPages.count > 1 else {
-                    let key_PageName = String(arrayPages[0].split(separator: ":")[0].split(separator: "/").last!)
-                    let value_PageTitle = arrayPages[0].split(separator: ":")[2].trimmingCharacters(in: .whitespacesAndNewlines)
+                // Checking directories for pages and other directories
+                let checkForPages = try shellController.unixCommand(command: "ls \(rootDirectory)/\(pathInsideApp)*.md", option: "|", path: "grep '(no matches found)*'")
+                let checkForDirs = try shellController.unixCommand(command: "ls \(rootDirectory)/\(pathInsideApp)*/", option: "|", path: "grep '(no matches found)*'")
 
-                    processedPageTitles[key_PageName] = value_PageTitle
-                    processedPageTitles[String(arrayDirestories[0].split(separator: "/").last!)] = String(arrayDirestories[0].split(separator: "/").last!)
-                    processedPageTitles["..."] = "./"
+                if checkForDirs != "" {arrayDirestories = []}
+                if checkForPages != "" {arrayPages = []}
 
-                    return processedPageTitles
-                }
-                
                 var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayDirestories, processedPageTitles: processedPageTitles)
                 var formattedPage = formatter.formatting()
                 
-                formattedPage["..."] = "./"
+                formattedPage["../"] = "..."
 
                 return formattedPage
 
