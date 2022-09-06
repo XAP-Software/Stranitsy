@@ -4,34 +4,54 @@ struct PagesParameters: Codable {
 
     func getPageParameters(command: String, directory: String? = nil) throws -> [String: String] {
         let shellController = ShellController()
-        let directoryURL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
+        let rootDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
+
+        let titlePagesFromBash: String
+        let directories: String
+
+        if directory == nil {
+            titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title':", option: nil, path: "\(rootDirectory)/*.md")
+            directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(rootDirectory)/*/")
+        } else {
+            titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title':", option: nil, path: "\(rootDirectory)/\(directory!)/*.md")
+            directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(rootDirectory)/\(directory!)/*/")
+        }
+
+        let arrayPages = titlePagesFromBash.split(separator: "\n")
+        let arrayDirestories = directories.split(separator: "\n")
 
         switch command {
-            // case "listPagesFromDirectory":
+            case "listPagesFromDirectory":
+                var processedPageTitles: [String: String] = [:]
 
-            //     return "a"
+                guard arrayPages.count > 1 else {
+                    let key_PageName = String(arrayPages[0].split(separator: ":")[0].split(separator: "/").last!)
+                    let value_PageTitle = arrayPages[0].split(separator: ":")[2].trimmingCharacters(in: .whitespacesAndNewlines)
+
+                    processedPageTitles[key_PageName] = value_PageTitle
+                    processedPageTitles[String(arrayDirestories[0].split(separator: "/").last!)] = String(arrayDirestories[0].split(separator: "/").last!)
+                    processedPageTitles["..."] = "./"
+
+                    return processedPageTitles
+                }
+                
+                var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayDirestories, processedPageTitles: processedPageTitles)
+                var formattedPage = formatter.formatting()
+                
+                formattedPage["..."] = "./"
+
+                return formattedPage
 
             // case "user":
             // case "level":
             // case "serialNumber":
             // case "parentID":
             default:
-                let titlePagesFromBash = try shellController.unixCommand(command: "grep -w '^title':", option: nil, path: "\(directoryURL)/*.md")
-                let arrayPages = titlePagesFromBash.split(separator: "\n")
-                let directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(directoryURL)/*/")
-                let arrayDirestories = directories.split(separator: "\n")
-                var processedPageTitles: [String: String] = [:]
+                let processedPageTitles: [String: String] = [:]
 
-                for page in arrayPages {
-                    let pageTitleWithName = page.split(separator: "/").last!
-                    processedPageTitles[String(pageTitleWithName.split(separator: ":")[0])] = String(pageTitleWithName.split(separator: ":")[2].trimmingCharacters(in: .whitespacesAndNewlines))
-                }
+                var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayDirestories, processedPageTitles: processedPageTitles)
 
-                for directory in arrayDirestories {
-                    processedPageTitles[String(directory.split(separator: "/").last!)] = String(directory.split(separator: "/").last!)
-                }
-
-                return processedPageTitles
+                return formatter.formatting()
         }
     }
 }

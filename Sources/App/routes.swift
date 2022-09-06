@@ -20,7 +20,6 @@ func routes(_ app: Application) throws {
     // Getting a list of pages from directory
     pages.get("**") { req -> String in 
         let directoryName = req.parameters.getCatchall()[0]
-        print(directoryName)
 
         let getListPages = try pagesParameters.getPageParameters(command: "listPagesFromDirectory", directory: directoryName)
 
