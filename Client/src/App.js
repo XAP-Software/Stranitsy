@@ -8,7 +8,9 @@ import CreatePage from './components/CreatePage';
 // import { parse } from 'jekyll-markdown-parser';
 import { 
   BrowserRouter,
-  Link
+  Routes,
+  Link,
+  Route
 } from "react-router-dom";
 
 const savedText = localStorage.getItem("saved");
@@ -43,6 +45,7 @@ class App extends React.Component {
     content: '',
     pages: [],
     pageName: '',
+    path: '',
   };
 
   async componentDidMount () {
@@ -51,12 +54,22 @@ class App extends React.Component {
         const pages = res.data;
         this.setState({ pages });
       });
-
-    // POST request using axios with async/await
+    
+    localStorage.setItem("path", this.state.path)
   }
 
   async showPagesInDirectory (directory) {
-    await axios.get(`${host}/list/${directory}`)
+    let path;
+
+    // Change directory to upper directory
+    if (directory === 'back') {
+      path = localStorage.getItem('path').split('/').slice(0, -1).join('/')
+      localStorage.setItem('path', path)
+    } else {
+      path = directory;
+    }
+
+    await axios.get(`${host}/list${path}`)
       .then(res => {
         const pages = res.data;
         this.setState({ pages })
@@ -64,14 +77,25 @@ class App extends React.Component {
   }
 
   async showContent (page) {
-    await axios.get(`${host}/list/blob/main/${page}`)
+    // Checking the "page" argument against the content of page.md
+    let path;
+    if (page === 'back') {
+      this.showPagesInDirectory(page);
+      return;
+    }
+    else if (!page.includes('.md')) {
+      path = localStorage.getItem('path') + '/' + page;
+      localStorage.setItem('path', path);
+      this.showPagesInDirectory(path);
+      return;
+    }
+
+    path = localStorage.getItem('path') + '/' + page
+    await axios.get(`${host}/list/blob/main${path}`)
       .then(res => {
         let content = res.data;
-        if (content.includes("is a directory")) this.showPagesInDirectory(content.match(/[0-9A-F]{8}[-]?(?:[0-9A-F]{4}[-]?){3}[0-9A-F]{12}/))
-        else {
-          if (content === '') content = exampleText;
-          this.setState({ content })
-        }
+        if (content === '') content = exampleText;
+        this.setState({ content })
       });
     let pageName = page;
     this.setState({ pageName });
@@ -129,15 +153,25 @@ class App extends React.Component {
         <div className='App'>
           <div className='sidebarSpace'>
             <BrowserRouter>
+            <div>
               <ul>
                 {
-                  Object.keys(this.state.pages).map(page => 
-                    <li key={page}>
-                      <Link className='a-sidebar' onClick={() => {this.showContent(page)}} to={page}>{this.state.pages[page]}</Link>
+                  this.state.pages.map(({key, value}) => 
+                    <li key={key}>
+                      <Link className='a-sidebar' onClick={() => { this.showContent(key); } } to={key}>{value}</Link>
                     </li>
                   )
                 }
+                {
+                  this.state.pages.map(({key, value}) => 
+                    <Routes>
+                      <Route path={key}>
+                      </Route>
+                    </Routes>
+                  )
+                }
               </ul>
+            </div>
             </BrowserRouter>
           </div>
           <div className='editing-container'>
