@@ -2,7 +2,7 @@ import Vapor
 
 struct PagesParameters: Codable {
 
-    func getPageParameters(command: String, directory: String? = nil) throws -> [String: String] {
+    func getPageParameters(command: String, directory: String? = nil) throws -> [[String: String]] {
         let shellController = ShellController()
         let rootDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
 
@@ -22,7 +22,7 @@ struct PagesParameters: Codable {
 
         switch command {
             case "listPagesFromDirectory":
-                let processedPageTitles: [String: String] = [:]
+                let processedPageTitles: [[String: String]] = []
 
                 // Checking directories for pages and other directories
                 let checkForPages = try shellController.unixCommand(command: "ls \(rootDirectory)/\(pathInsideApp)*.md", option: "|", path: "grep '(no matches found)*'")
@@ -34,7 +34,7 @@ struct PagesParameters: Codable {
                 var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayDirestories, processedPageTitles: processedPageTitles)
                 var formattedPage = formatter.formatting()
                 
-                formattedPage["../"] = "..."
+                formattedPage.append(["key": "back", "value": "back"])
 
                 return formattedPage
 
@@ -43,7 +43,7 @@ struct PagesParameters: Codable {
             // case "serialNumber":
             // case "parentID":
             default:
-                let processedPageTitles: [String: String] = [:]
+                let processedPageTitles: [[String: String]] = []
 
                 var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayDirestories, processedPageTitles: processedPageTitles)
 
