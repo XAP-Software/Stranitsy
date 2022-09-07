@@ -58,7 +58,8 @@ class App extends React.Component {
     localStorage.setItem("path", this.state.path)
   }
 
-  async showPagesInDirectory (directory) {
+  // Change directory similar to cd in bash
+  async changeDirectory (directory) {
     let path;
 
     // Change directory to upper directory
@@ -69,6 +70,7 @@ class App extends React.Component {
       path = directory;
     }
 
+    // Change directory
     await axios.get(`${host}/list${path}`)
       .then(res => {
         const pages = res.data;
@@ -80,16 +82,17 @@ class App extends React.Component {
     // Checking the "page" argument against the content of page.md
     let path;
     if (page === 'back') {
-      this.showPagesInDirectory(page);
+      this.changeDirectory(page);
       return;
     }
     else if (!page.includes('.md')) {
       path = localStorage.getItem('path') + '/' + page;
       localStorage.setItem('path', path);
-      this.showPagesInDirectory(path);
+      this.changeDirectory(path);
       return;
     }
 
+    // Show content from file
     path = localStorage.getItem('path') + '/' + page
     await axios.get(`${host}/list/blob/main${path}`)
       .then(res => {
