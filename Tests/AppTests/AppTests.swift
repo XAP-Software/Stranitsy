@@ -30,12 +30,7 @@ final class AppTests: XCTestCase {
                 "FCF8BFB5-2CFF-4821-A2DE-7C47314D0F6E.md",
                 "FCF8BFB5-2CFF-4821-A2DE-7C47315D0F6E.md",
                 "FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E.md",
-                "FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E.md",
-                "997100FF-9408-4F80-884D-78DF8EF2FA5E",
-                "EE4E76EF-EC8A-40DC-961F-1C61D7021A7F",
-                "F5744F7A-CFB2-422C-8B8D-A716DAEBD825",
-                "FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E",
-                "sdf"
+                "FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E.md"
             ]
             XCTAssertEqual(filesKeys, expectedValue)
         })
@@ -46,7 +41,6 @@ final class AppTests: XCTestCase {
             let expectedValue = [
                 ["value":"Hello_this_is_example_text","key":"633A3CE0-3EC4-4DAF-BD2B-502B6A4D0022.md"],
                 ["value":"Empty_page","key":"FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E.md"],
-                ["value":"FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E","key":"FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E"],
                 ["value":"back","key":"back"]
             ]
 
