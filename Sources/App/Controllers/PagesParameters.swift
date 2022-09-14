@@ -14,26 +14,24 @@ struct PagesParameters: Codable {
         } else {
             pathInsideApp = directory! + "/"
         }
-
-        let titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title:'", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md")
-        let childDirectoryFieldFromBash = try shellController.unixCommand(command: "grep -H '^childDirectory:'", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md")
+  
+        let titlePagesFromBash = try shellController.unixCommand(command: "rg -U --pcre2 -m1 '(?<=---\\s)(.|\\r|\\n)*?(?=---)'", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md | rg --pcre2 ':title:'")
+        let childDirectoryFieldFromBash = try shellController.unixCommand(command: "rg -U --pcre2 -m1 '(?<=---\\s)(.|\\r|\\n)*?(?=---)'", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md | rg --pcre2 ':childDirectory:'") 
         
         var arrayPages = titlePagesFromBash.split(separator: "\n")
+        
         var arrayChildDirectories = childDirectoryFieldFromBash.split(separator: "\n")
-
+  
         let processedPageTitles: [[String: String]] = []
 
         var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayChildDirectories, processedPageTitles: processedPageTitles)
-
+    
         formattedPage = formatter.formatting()
 
+  
         switch command {
 
-            // case "user":
-            // case "level":
-            // case "serialNumber":
-            // case "parentID":
-            default:
+            case "listPagesFromDirectory":
                 let processedPageTitles: [[String: String]] = []
 
                 // Checking directories for pages and other directories
@@ -45,12 +43,19 @@ struct PagesParameters: Codable {
 
                 var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayChildDirectories, processedPageTitles: processedPageTitles)
                 formattedPage.append(formatter.formatting()[0])
+            // case "level":
+            // case "serialNumber":
+            // case "parentID":
+            default:
+                break
         }
+        
 
         let jsonEncoder = JSONEncoder()
-        let jsonData = try jsonEncoder.encode(formattedPage)
-        let JSON = String(data: jsonData, encoding: String.Encoding.utf8)
 
+        let jsonData = try jsonEncoder.encode(formattedPage)
+   
+        let JSON = String(data: jsonData, encoding: String.Encoding.utf8)
         return JSON!
     }
 }
