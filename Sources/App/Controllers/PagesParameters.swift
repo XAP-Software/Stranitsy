@@ -16,7 +16,7 @@ struct PagesParameters: Codable {
         }
   
         let titlePagesFromBash = try shellController.unixCommand(command: "rg -U --pcre2 -m1 '(?<=---\\s)(.|\\r|\\n)*?(?=---)'", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md | rg --pcre2 ':title:'")
-        let childDirectoryFieldFromBash = try shellController.unixCommand(command: "rg -U --pcre2 -m1 '(?<=---\\s)(.|\\r|\\n)*?(?=---)'", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md | rg --pcre2 ':childDirectory:'") 
+        let childDirectoryFieldFromBash = try shellController.unixCommand(command: "rg -U --pcre2 -m1 '(?<=---\\s)(.|\\r|\\n)*?(?=---)' ", option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md | rg --pcre2 ':childDirectory:'") 
         
         var arrayPages = titlePagesFromBash.split(separator: "\n")
         
