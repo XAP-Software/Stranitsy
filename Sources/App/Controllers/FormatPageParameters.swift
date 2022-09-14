@@ -5,18 +5,22 @@ struct FormatPageParameters {
 
     mutating func formatting() -> [[String: String]] {
 
-        if arrayPages != [] {
-            for page in arrayPages {
-                let pageTitleWithName = page.split(separator: "/").last!
-                processedPageTitles.append(["key": String(pageTitleWithName.split(separator: ":")[0]), 
-                                            "value": String(pageTitleWithName.split(separator: ":")[2].trimmingCharacters(in: .whitespacesAndNewlines))])
+        var childsExisting: [String: Bool] = [:]
+        if arrayDirestories != []{
+            for directory in arrayDirestories{
+                let key = String(directory.split(separator: "/").last!.split(separator: ":")[0].split(separator:".")[0])
+                let value = String(directory.split(separator: ":")[2].split(separator: " ")[0])
+                childsExisting[key] = Bool(value)
             }
         }
 
-        if arrayDirestories != [] {
-            for directory in arrayDirestories {
-                processedPageTitles.append(["key": String(directory.split(separator: "/").last!), 
-                                            "value": String(directory.split(separator: "/").last!)])
+        if arrayPages != [] {
+            for page in arrayPages {
+                let pageTitleWithName = page.split(separator: "/").last!
+                let key = String(pageTitleWithName.split(separator: ":")[0])
+                let value = String(pageTitleWithName.split(separator: ":")[2].trimmingCharacters(in: .whitespacesAndNewlines))
+                let directory: String = childsExisting[String(key.split(separator:".")[0])] == nil ? "false" : String(childsExisting[String(key.split(separator:".")[0])]!)
+                processedPageTitles.append(["key": key, "value": value, "directory": directory])
             }
         }
 
