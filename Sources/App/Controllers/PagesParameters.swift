@@ -4,66 +4,59 @@ struct PagesParameters: Codable {
     enum ServerComands: String {
         case pagesParamas = "rg -U -H --pcre2 -m1 '(?<=---\\s)(.|\\r|\\n)*?(?=---)'"
     }
-    func getPageParameters(command: String, directory: String? = nil) throws -> String {
+
+
+    func getPageParametersFromDirectory (_ path: String) throws -> [[String: String]] {
         let shellController = ShellController()
+        let titlePagesFromBash = try shellController.unixCommand(command: ServerComands.pagesParamas.rawValue, option: nil, path: "\(path)*.md | rg --pcre2 ':title:'")
+        let childDirectoryFieldFromBash = try shellController.unixCommand(command: ServerComands.pagesParamas.rawValue, option: nil, path: "\(path)*.md | rg --pcre2 ':childDirectory: true'") 
+        let arrayPages = titlePagesFromBash.split(separator: "\n")
+        let arrayChildDirectories = childDirectoryFieldFromBash.split(separator: "\n")
+              
+        if(String(arrayPages[0].split(separator: ":")[0]) != "zsh"){ 
+                    
+            var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayChildDirectories)
+                
+            return formatter.formatting()
+
+        } else {
+            return []
+        }
+    } 
+
+
+    func getPageParameters(command: String,directory: String? = nil) throws -> String {
         let rootDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
         var formattedPage: [[String: String]] = []
-        var JSON : String? = nil
-        let pathInsideApp: String
+        var JSON : String? = "[]"
+        switch command {
+            case "list":
+                    formattedPage = try getPageParametersFromDirectory("\(rootDirectory)/")
+                    let jsonData = try JSONEncoder().encode(formattedPage)
+                    JSON = String(data: jsonData, encoding: String.Encoding.utf8)
 
-        if directory == nil {
-            pathInsideApp = "./"
-        } else {
-            pathInsideApp = directory! + "/"
-        }
-        print("\(rootDirectory)/\(pathInsideApp)*.md")
-        let titlePagesFromBash = try shellController.unixCommand(command: ServerComands.pagesParamas.rawValue, option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md | rg --pcre2 ':title:'")
-        let childDirectoryFieldFromBash = try shellController.unixCommand(command: ServerComands.pagesParamas.rawValue, option: nil, path: "\(rootDirectory)/\(pathInsideApp)*.md | rg --pcre2 ':childDirectory:'") 
-        var arrayPages = titlePagesFromBash.split(separator: "\n")
-        var arrayChildDirectories = childDirectoryFieldFromBash.split(separator: "\n")
-        if(String(arrayPages[0].split(separator: ":")[0]) != "zsh"){ 
-            // INFO: run if \(rootDirectory)/\(pathInsideApp) isn`t empty
-            let processedPageTitles: [[String: String]] = []
-
-            var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayChildDirectories, processedPageTitles: processedPageTitles)
-        
-            formattedPage = formatter.formatting()
-
-    
-            switch command {
-
-                //  case "listPagesFromDirectory":
+                break
+            case "listPagesFromDirectory":
+                let path : Array<String> = directory!.split(separator: "/").map{ String($0)}
+                var heirarchy : [Int : [[String: String]]] = [:]
+                var pathInsideApp: String = "/"
+                var index : Int = 0
+                while index <= path.count{
+                    heirarchy[index] = try getPageParametersFromDirectory("\(rootDirectory)\(pathInsideApp)")
+                    if index < path.count {pathInsideApp += "\(path[index])/"}
+                    index += 1
                     
-                    // let processedPageTitles: [[String: String]] = []
+                }
 
-                    // // Checking directories for pages and other directories
-                    // let checkForPages = try shellController.unixCommand(command: "ls \(rootDirectory)/\(pathInsideApp)*.md", option: "|", path: "grep '(no matches found)*'")
-                    // let checkForDirs = try shellController.unixCommand(command: "ls \(rootDirectory)/\(pathInsideApp)*/", option: "|", path: "grep '(no matches found)*'")
+                
+                let jsonData = try JSONEncoder().encode(heirarchy)
+                JSON = String(data: jsonData, encoding: String.Encoding.utf8)
+                break
 
-                    // if checkForDirs != "" {arrayChildDirectories = []}
-                    // if checkForPages != "" {arrayPages = []}
-
-                    // var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayChildDirectories, processedPageTitles: processedPageTitles)
-                    // formattedPage.append(formatter.formatting()[0])
-                // case "level":
-                // case "serialNumber":
-                // case "parentID":
-                default:
-                    break
-            }
-            
-
-            let jsonEncoder = JSONEncoder()
-
-            let jsonData = try jsonEncoder.encode(formattedPage)
-        
-            JSON = String(data: jsonData, encoding: String.Encoding.utf8)
-
-        } else {
-            // INFO: Run if \(rootDirectory)/\(pathInsideApp) is empty
-            JSON = "[]"
+            default:
+                break
         }
-        
+
         return JSON!
     }
 }
