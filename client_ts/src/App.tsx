@@ -1,6 +1,7 @@
 import React from "react";
 import Editor from "rich-markdown-editor";
 import axios from "axios";
+import SideBar from "./components/SideBar";
 import { BrowserRouter, Routes, Link, Route } from "react-router-dom";
 import "./styles/App.css";
 
@@ -15,10 +16,17 @@ function App() {
   const [pageName, setPageName] = React.useState("");
   const [pages, setPages] = React.useState([]);
   const [path, setPath] = React.useState("");
+
   const setPagesFromBackend = async (): Promise<void> => {
     await axios.get(`${host}/list${path!}`).then((res) => {
       setPages(res.data);
     });
+  };
+
+  const updateFileTree = (
+    pageResult: { key: String; directory: String; value: String }[]
+  ): void => {
+    const path_array = path.split("/");
   };
 
   const setContentFromBackend = async (path: String): Promise<void> => {
@@ -35,6 +43,11 @@ function App() {
     setDark(!dark);
     localStorage.setItem("dark", dark ? "enabled" : "disabled");
   };
+
+  const test_action = (key: string) => {
+    setContent(key);
+  };
+
   React.useEffect(() => {
     setPagesFromBackend();
   }, [path]);
@@ -45,13 +58,14 @@ function App() {
     localStorage.setItem("path", "/");
     setPath("/");
   }
+
   return (
     <>
-      <ul>
-        {pages.map(({ value, key }) => {
-          return <li key={key}>{value}</li>;
-        })}
-      </ul>
+      <SideBar
+        pages={pages}
+        action={(keyValue: String): void => test_action(String(keyValue))}
+      />
+      {content} {path}
     </>
   );
 }
