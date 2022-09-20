@@ -12,7 +12,6 @@ struct PagesParameters: Codable {
         let childDirectoryFieldFromBash = try shellController.unixCommand(command: ServerComands.pagesParamas.rawValue, option: nil, path: "\(path)*.md | rg --pcre2 ':childDirectory: true'") 
         let arrayPages = titlePagesFromBash.split(separator: "\n")
         let arrayChildDirectories = childDirectoryFieldFromBash.split(separator: "\n")
-              
         if(String(arrayPages[0].split(separator: ":")[0]) != "zsh"){ 
                     
             var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayChildDirectories)
@@ -29,27 +28,27 @@ struct PagesParameters: Codable {
         let rootDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
         var formattedPage: [[String: String]] = []
         var JSON : String? = "[]"
+        var heirarchy : [[[String: String]]] = []
         switch command {
             case "list":
-                    formattedPage = try getPageParametersFromDirectory("\(rootDirectory)/")
-                    let jsonData = try JSONEncoder().encode(formattedPage)
+                    heirarchy.append(try getPageParametersFromDirectory("\(rootDirectory)/"))
+                    let jsonData = try JSONEncoder().encode(heirarchy)
                     JSON = String(data: jsonData, encoding: String.Encoding.utf8)
 
                 break
             case "listPagesFromDirectory":
                 let path : Array<String> = directory!.split(separator: "/").map{ String($0)}
-                var heirarchy : [Int : [[String: String]]] = [:]
                 var pathInsideApp: String = "/"
+                // print(path)
                 var index : Int = 0
                 while index <= path.count{
-                    heirarchy[index] = try getPageParametersFromDirectory("\(rootDirectory)\(pathInsideApp)")
+                    heirarchy.append(try getPageParametersFromDirectory("\(rootDirectory)\(pathInsideApp)"))
                     if index < path.count {pathInsideApp += "\(path[index])/"}
                     index += 1
                     
                 }
-
-                
                 let jsonData = try JSONEncoder().encode(heirarchy)
+                
                 JSON = String(data: jsonData, encoding: String.Encoding.utf8)
                 break
 

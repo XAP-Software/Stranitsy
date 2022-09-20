@@ -16,14 +16,7 @@ func routes(_ app: Application) throws {
     // Getting a list of pages from directory
     pages.get("**") { req -> String in 
         let directoryName = req.parameters.getCatchall()
-        var setDirectories = Set<String>()
-
-        for directory in directoryName {
-            setDirectories.insert(directory)
-        }
-
-        let directory = setDirectories.joined(separator: "/")
-
+        let directory = directoryName.joined(separator: "/")
         let getListPages = try pagesParameters.getPageParameters(command: "listPagesFromDirectory", directory: directory)
 
         return getListPages
