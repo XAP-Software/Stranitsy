@@ -6,6 +6,7 @@ type EditingContainerProps = {
   readOnly: boolean;
   dark: boolean;
   pageName: string;
+  action: () => void;
   deletePage: (pageName: string) => void;
   handleSaveValue: () => void;
   handleToggleDark: () => void;
@@ -17,6 +18,7 @@ const EditingContainer = ({
   dark,
   pageName,
   children,
+  action,
   deletePage,
   handleSaveValue,
   handleToggleDark,
@@ -28,7 +30,7 @@ const EditingContainer = ({
         <div className='space-button'>
           <div className='editing-buttons'>
             <br />
-            <CreatePage />
+            <CreatePage action={action} />
             <button type='button' onClick={handleToggleReadOnly}>
               {readOnly ? "Редактировать" : "Только для чтения"}
             </button>{" "}

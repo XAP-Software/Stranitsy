@@ -86,6 +86,7 @@ function App() {
           handleSaveValue={handleSaveValue}
           handleToggleDark={handleToggleDark}
           handleToggleReadOnly={handleToggleDark}
+          action={setPagesFromBackend}
         ></EditingContainer>
       </div>
     </>
