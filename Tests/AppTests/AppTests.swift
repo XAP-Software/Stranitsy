@@ -10,47 +10,98 @@ final class AppTests: XCTestCase {
 
         try app.test(.GET, "list", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(res.body.string, #"""
-                                                [{"url":"\/5FFA0A86-34FF-4959-B819-1F4E5DF8A18B.md","name":"5FFA0A86-34FF-4959-B819-1F4E5DF8A18B.md"},{"name":"997100FF-9408-4F80-884D-78DF8EF2FA5E.md","url":"\/997100FF-9408-4F80-884D-78DF8EF2FA5E.md"},{"url":"\/Article.md","name":"Article.md"},{"url":"\/EE4E76EF-EC8A-40DC-961F-1C61D7021A7F.md","name":"EE4E76EF-EC8A-40DC-961F-1C61D7021A7F.md"},{"url":"\/EE4E76EF-EC8A-40DC-961F-1C61D7021A7F\/contacts.md","name":"2"},{"url":"\/New book\/book for test.md","name":"2"},{"url":"\/New page.md","name":"New page.md"},{"url":"\/book.md","name":"book.md"},{"name":"page1.md","url":"\/page1.md"},{"name":"pages.md","url":"\/pages.md"},{"name":"Новая страница.md","url":"\/Новая страница.md"},{"name":"2","url":"\/книга1\/empty page.md"},{"name":"2","url":"\/книга1\/files.md"},{"name":"3","url":"\/книга1\/книга1.2\/page1.2.md"},{"name":"2","url":"\/книга2\/page1.1.md"}]
-                                                """#)
+            let list = try PagesParameters().getPageParameters(command: "list")
+
+            var filesKeys: [String] = []
+
+            for el in list {
+                filesKeys.append(el["key"]!)
+            }
+
+            let expectedValue = [
+                "09AC82E1-D4AD-44D9-8062-06434C728442.md",
+                "5FFA0A86-34FF-4959-B819-1F4E5DF8A18B.md",
+                "633A3CE0-3EC4-4DAF-BD2B-502B6A4D0020.md",
+                "633A3CE0-3EC4-4DAF-BD2B-502B6A4D0021.md",
+                "633A3CE0-3EC4-4DAF-BD2B-502B6A4D0022.md",
+                "633A3CE1-3EC4-4DAF-BD2B-502B6A4D0022.md",
+                "997100FF-9408-4F80-884D-78DF8EF2FA5E.md",
+                "EE4E76EF-EC8A-40DC-961F-1C61D7021A7F.md",
+                "FCF8BFB5-2CFF-4821-A2DE-7C47314D0F6E.md",
+                "FCF8BFB5-2CFF-4821-A2DE-7C47315D0F6E.md",
+                "FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E.md",
+                "FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E.md"
+            ]
+            XCTAssertEqual(filesKeys, expectedValue)
+        })
+
+        try app.test(.GET, "list/FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E", afterResponse: { res in 
+            XCTAssertEqual(res.status, .ok)
+            let listFromFolder = try PagesParameters().getPageParameters(command: "listPagesFromDirectory", directory: "/FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E")
+            let expectedValue = [
+                ["value":"Hello_this_is_example_text","key":"633A3CE0-3EC4-4DAF-BD2B-502B6A4D0022.md"],
+                ["value":"Empty_page","key":"FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E.md"],
+                ["value":"back","key":"back"]
+            ]
+
+            XCTAssertEqual(listFromFolder, expectedValue)
+        })
+
+        try app.test(.GET, "list/FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E/FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E", afterResponse: { res in 
+            XCTAssertEqual(res.status, .ok)
+            let listFromFolder = try PagesParameters().getPageParameters(command: "listPagesFromDirectory", 
+                                                                                               directory: "/FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E/FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E")
+            let expectedValue = [
+                ["value":"Page_on_3_level","key":"633A3CE0-3EC4-4DAF-BD2B-502B6A4D0031.md"],
+                ["key": "back", "value": "back"]
+            ]
+
+            XCTAssertEqual(listFromFolder, expectedValue)
+        })
+
+        try app.test(.GET, "list/blob/main/FCF8BFB5-2CFF-4821-A2DE-7C47515D0F6E/FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E/633A3CE0-3EC4-4DAF-BD2B-502B6A4D0031.md", afterResponse: { res in
+            XCTAssertEqual(res.status, .ok)
+            let expectedValue = #"""
+
+                                        ---
+
+                                        ID: 633A3CE0-3EC4-4DAF-BD2B-502B6A4D0031
+                                        title: Page_on_3_level
+                                        userName: Kostya
+                                        level: 3
+                                        serialNumber: 1
+                                        parentID: FCF8BFB5-2CFF-4821-A2DE-7C47525D0F6E
+
+                                        ---
+
+                                        Hello fnjnciwj ncijnw qeincpqine pinweiu 1-2938jd- 91j3 oi1dmpioj -ijdo wed/we w'w\[ ep\]\[p\]w\[le \[wpekd pdsmcpowiejfpojpowijr opiwjepoi jpqwcnwepi nwefpowqi enpownefp iwnefpi qwjnel
+                                        sdf sdfsd dfsfsd
+                                        iw jepij pqwiejf pwqeijf poi
+
+                                        """#
+            XCTAssertEqual(res.body.string, expectedValue)
         })
         
-        try app.test(.GET, "list/page1.md", afterResponse: { res in
+        try app.test(.GET, "list/blob/main/FCF8BFB5-2CFF-4821-A2DE-7C47314D0F6E.md", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(res.body.string, """
-                                                
-                                                ---
+            let expectedValue = """
+                                        
+                                        ---
 
-                                                ID: 123dfs-wrwf23-23d2-3413
+                                        ID: FCF8BFB5-2CFF-4821-A2DE-7C47314D0F6E
+                                        title: New_page
+                                        userName: Kostya
+                                        level: 1
+                                        serialNumber: 6
+                                        parentID: ()
 
-                                                title: wdfef
 
-                                                userName: Kostya
+                                        ---
 
+                                        sad
 
-                                                ---
-
-                                                Saving data with FileManager is easy!
-
-                                                """)
-        })
-
-        try app.test(.POST, "list/createPages", beforeRequest: { req in
-            try req.content.encode(["title": "Test",
-                                    "userName": "Somebody",
-                                    "level": "2",
-                                    "sNumber": "1",
-                                    "parentID": "797E2F6D-4126-49FD-8D90-2C88C56D80A6",
-                                    "ID": "EE4E76EF-EC8A-40DC-961F-1C61D7021A7F"])
-        }, afterResponse: { res in
-                XCTAssertEqual(res.status, .ok)
-                let pageParams = try res.content.decode(PageParams.self)
-                XCTAssertEqual(pageParams.ID, "EE4E76EF-EC8A-40DC-961F-1C61D7021A7F")
-                XCTAssertEqual(pageParams.title, "Test")
-                XCTAssertEqual(pageParams.userName, "Somebody")
-                XCTAssertEqual(pageParams.level, "2")
-                XCTAssertEqual(pageParams.sNumber, "1")
-                XCTAssertEqual(pageParams.parentID, "797E2F6D-4126-49FD-8D90-2C88C56D80A6")
+                                        """
+            XCTAssertEqual(res.body.string, expectedValue)
         })
     }
 }

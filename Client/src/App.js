@@ -8,7 +8,9 @@ import CreatePage from './components/CreatePage';
 // import { parse } from 'jekyll-markdown-parser';
 import { 
   BrowserRouter,
-  Link
+  Routes,
+  Link,
+  Route
 } from "react-router-dom";
 
 const savedText = localStorage.getItem("saved");
@@ -43,6 +45,7 @@ class App extends React.Component {
     content: '',
     pages: [],
     pageName: '',
+    path: '',
   };
 
   async componentDidMount () {
@@ -51,15 +54,50 @@ class App extends React.Component {
         const pages = res.data;
         this.setState({ pages });
       });
+    
+    localStorage.setItem("path", this.state.path)
+  }
 
-    // POST request using axios with async/await
+  // Change directory similar to cd in bash
+  async changeDirectory (directory) {
+    let path;
+
+    // Change directory to upper directory
+    if (directory === 'back') {
+      path = localStorage.getItem('path').split('/').slice(0, -1).join('/')
+      localStorage.setItem('path', path)
+    } else {
+      path = directory;
+    }
+
+    // Change directory
+    await axios.get(`${host}/list${path}`)
+      .then(res => {
+        const pages = res.data;
+        this.setState({ pages })
+      })
   }
 
   async showContent (page) {
-    await axios.get(`${host}/list${page}`)
+    // Checking the "page" argument against the content of page.md
+    let path;
+    if (page === 'back') {
+      this.changeDirectory(page);
+      return;
+    }
+    else if (!page.includes('.md')) {
+      path = localStorage.getItem('path') + '/' + page;
+      localStorage.setItem('path', path);
+      this.changeDirectory(path);
+      return;
+    }
+
+    // Show content from file
+    path = localStorage.getItem('path') + '/' + page
+    await axios.get(`${host}/list/blob/main${path}`)
       .then(res => {
         let content = res.data;
-        if (res.data === '') content = exampleText;
+        if (content === '') content = exampleText;
         this.setState({ content })
       });
     let pageName = page;
@@ -67,9 +105,9 @@ class App extends React.Component {
   }
 
   deletePage (page) {
-    axios.delete(`${host}/list${page}`)
+    axios.delete(`${host}/list/blob/main/${page}`)
       .then(() =>
-          this.setState({ status: "Страница удалена" })
+        this.setState({ status: "Страница удалена" })
       );
   }
 
@@ -77,12 +115,14 @@ class App extends React.Component {
     this.setState({ readOnly: !this.state.readOnly });
   };
 
+  // Changing theme
   handleToggleDark = () => {
     const dark = !this.state.dark;
     this.setState({ dark });
     localStorage.setItem("dark", dark ? "enabled" : "disabled");
   };
 
+  // Write text to local storage
   handleSaveValue = () => {
     const existing = localStorage.getItem("saved") || "";
     const value = `${existing}`;
@@ -116,15 +156,25 @@ class App extends React.Component {
         <div className='App'>
           <div className='sidebarSpace'>
             <BrowserRouter>
+            <div>
               <ul>
                 {
-                  this.state.pages.map(page => 
-                    <li key={page.name}>
-                      <Link className='a-sidebar' onClick={() => {this.showContent(page.url)}} to={page.url}>{page.name}</Link>
+                  this.state.pages.map(({key, value}) => 
+                    <li key={key}>
+                      <Link className='a-sidebar' onClick={() => { this.showContent(key); } } to={key}>{value}</Link>
                     </li>
                   )
                 }
+                {
+                  this.state.pages.map(({key, value}) => 
+                    <Routes>
+                      <Route path={key}>
+                      </Route>
+                    </Routes>
+                  )
+                }
               </ul>
+            </div>
             </BrowserRouter>
           </div>
           <div className='editing-container'>

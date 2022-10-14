@@ -10,24 +10,16 @@ func routes(_ app: Application) throws {
     pages.get { req -> String in
         let getListPages = try pagesParameters.getPageParameters(command: "list")
 
-        let jsonEncoder = JSONEncoder()
-        let jsonData = try jsonEncoder.encode(getListPages)
-        let JSON = String(data: jsonData, encoding: String.Encoding.utf8)
-
-        return JSON!
+        return getListPages
     }
 
     // Getting a list of pages from directory
     pages.get("**") { req -> String in 
-        let directoryName = req.parameters.getCatchall()[0]
+        let directoryName = req.parameters.getCatchall()
+        let directory = directoryName.joined(separator: "/")
+        let getListPages = try pagesParameters.getPageParameters(command: "listPagesFromDirectory", directory: directory)
 
-        let getListPages = try pagesParameters.getPageParameters(command: "listPagesFromDirectory", directory: directoryName)
-
-        let jsonEncoder = JSONEncoder()
-        let jsonData = try jsonEncoder.encode(getListPages)
-        let JSON = String(data: jsonData, encoding: String.Encoding.utf8)
-
-        return JSON!
+        return getListPages
     }
     
     // Getting page content
@@ -36,6 +28,13 @@ func routes(_ app: Application) throws {
 
         let pageName = req.parameters.getCatchall().joined(separator: "/").split(separator: " ").joined(separator: "\\ ")
         let filePath = "\(directoryURL)/\(pageName)"
+
+        // Sending page key for jumping to lower directory
+        // let childDirectory = try content.unixCommand(command: "grep -H '^childDirectory:'", option: nil, path: filePath)
+        // if childDirectory != "" {
+        //     print(pageName)
+        //     try pagesParameters.getPageParameters(command: "listPagesFromDirectory", directory: pageName)
+        // }
 
         let showContent = try content.unixCommand(command: "more", option: nil, path: filePath)
 

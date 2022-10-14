@@ -1,57 +1,61 @@
 import Vapor
 
 struct PagesParameters: Codable {
+    enum ServerComands: String {
+        case pagesParamas = "rg -U -H --pcre2 -m1 '(?<=---\\s)(.|\\r|\\n)*?(?=---)'"
+    }
 
-    func getPageParameters(command: String, directory: String? = nil) throws -> [String: String] {
+
+    func getPageParametersFromDirectory (_ path: String) throws -> [[String: String]] {
         let shellController = ShellController()
-        let rootDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
-
-        let titlePagesFromBash: String
-        let directories: String
-
-        if directory == nil {
-            titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title':", option: nil, path: "\(rootDirectory)/*.md")
-            directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(rootDirectory)/*/")
-        } else {
-            titlePagesFromBash = try shellController.unixCommand(command: "grep -H '^title':", option: nil, path: "\(rootDirectory)/\(directory!)/*.md")
-            directories = try shellController.unixCommand(command: "ls", option: "-d", path: "\(rootDirectory)/\(directory!)/*/")
-        }
-
+        let titlePagesFromBash = try shellController.unixCommand(command: ServerComands.pagesParamas.rawValue, option: nil, path: "\(path)*.md | rg --pcre2 ':title:'")
+        let childDirectoryFieldFromBash = try shellController.unixCommand(command: ServerComands.pagesParamas.rawValue, option: nil, path: "\(path)*.md | rg --pcre2 ':childDirectory: true'") 
         let arrayPages = titlePagesFromBash.split(separator: "\n")
-        let arrayDirestories = directories.split(separator: "\n")
-
-        switch command {
-            case "listPagesFromDirectory":
-                var processedPageTitles: [String: String] = [:]
-
-                guard arrayPages.count > 1 else {
-                    let key_PageName = String(arrayPages[0].split(separator: ":")[0].split(separator: "/").last!)
-                    let value_PageTitle = arrayPages[0].split(separator: ":")[2].trimmingCharacters(in: .whitespacesAndNewlines)
-
-                    processedPageTitles[key_PageName] = value_PageTitle
-                    processedPageTitles[String(arrayDirestories[0].split(separator: "/").last!)] = String(arrayDirestories[0].split(separator: "/").last!)
-                    processedPageTitles["..."] = "./"
-
-                    return processedPageTitles
-                }
+        let arrayChildDirectories = childDirectoryFieldFromBash.split(separator: "\n")
+        if(String(arrayPages[0].split(separator: ":")[0]) != "zsh"){ 
+                    
+            var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayChildDirectories)
                 
-                var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayDirestories, processedPageTitles: processedPageTitles)
-                var formattedPage = formatter.formatting()
-                
-                formattedPage["..."] = "./"
+            return formatter.formatting()
 
-                return formattedPage
-
-            // case "user":
-            // case "level":
-            // case "serialNumber":
-            // case "parentID":
-            default:
-                let processedPageTitles: [String: String] = [:]
-
-                var formatter = FormatPageParameters(arrayPages: arrayPages, arrayDirestories: arrayDirestories, processedPageTitles: processedPageTitles)
-
-                return formatter.formatting()
+        } else {
+            return []
         }
+    } 
+
+
+    func getPageParameters(command: String,directory: String? = nil) throws -> String {
+        let rootDirectory = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".stranitsy").path
+        var formattedPage: [[String: String]] = []
+        var JSON : String? = "[]"
+        var heirarchy : [[[String: String]]] = []
+        switch command {
+            case "list":
+                    heirarchy.append(try getPageParametersFromDirectory("\(rootDirectory)/"))
+                    let jsonData = try JSONEncoder().encode(heirarchy)
+                    JSON = String(data: jsonData, encoding: String.Encoding.utf8)
+
+                break
+            case "listPagesFromDirectory":
+                let path : Array<String> = directory!.split(separator: "/").map{ String($0)}
+                var pathInsideApp: String = "/"
+                // print(path)
+                var index : Int = 0
+                while index <= path.count{
+                    heirarchy.append(try getPageParametersFromDirectory("\(rootDirectory)\(pathInsideApp)"))
+                    if index < path.count {pathInsideApp += "\(path[index])/"}
+                    index += 1
+                    
+                }
+                let jsonData = try JSONEncoder().encode(heirarchy)
+                
+                JSON = String(data: jsonData, encoding: String.Encoding.utf8)
+                break
+
+            default:
+                break
+        }
+
+        return JSON!
     }
 }
