@@ -1,0 +1,7 @@
+.sidebar_flex-container{
+	display: flex;
+}
+
+.sidebar_emty-div {
+	min-width: 20px;
+}

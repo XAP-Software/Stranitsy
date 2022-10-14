@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Link, Route } from "react-router-dom";
 import React from "react";
+import "../styles/SideBar.css";
 
 type SideBarProps = {
   action: (pathValue: string, index: number) => void;
@@ -24,7 +25,7 @@ const SideBarLevel = ({ path, action, pages, level }: SideBarLevelProps) => {
           {pages![0].map(({ value, key }) => {
             return (
               <li key={String(key)}>
-                <>
+                
                   <Link
                     className='a-sidebar'
                     onClick={() => {
@@ -40,17 +41,20 @@ const SideBarLevel = ({ path, action, pages, level }: SideBarLevelProps) => {
                   pages[1] !== undefined &&
                   pages[0].length ? (
                     <>
-                      <SideBarLevel
-                        pages={pages.slice(1)}
-                        path={path.slice(1)}
-                        action={action}
-                        level={level + 1}
-                      />
+                      <div className="sidebar_flex-container">
+                        <div className="sidebar_emty-div"></div>
+                        <SideBarLevel
+                          pages={pages.slice(1)}
+                          path={path.slice(1)}
+                          action={action}
+                          level={level+1}
+                        />
+                      </div>
                     </>
                   ) : (
                     <></>
                   )}
-                </>
+                
               </li>
             );
           })}
@@ -67,7 +71,7 @@ const SideBar = ({ children, pages, path, action }: SideBarProps) => {
     <>
       <div className='sidebarSpace'>
         <BrowserRouter>
-          <ul>
+          
             {pages! === undefined ? (
               ""
             ) : (
@@ -78,7 +82,7 @@ const SideBar = ({ children, pages, path, action }: SideBarProps) => {
                 level={level}
               />
             )}
-          </ul>
+        
         </BrowserRouter>
       </div>
     </>
