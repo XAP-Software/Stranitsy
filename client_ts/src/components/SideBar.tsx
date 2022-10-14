@@ -2,16 +2,16 @@ import { BrowserRouter, Routes, Link, Route } from "react-router-dom";
 import React from "react";
 
 type SideBarProps = {
-  action: (pathValue: String, index: number) => void;
-  pages?: { key: String; directory: String; value: String }[][];
-  path: String;
+  action: (pathValue: string, index: number) => void;
+  pages?: { key: string; directory: string; value: string }[][];
+  path: string;
   children?: React.ReactNode;
 };
 
 type SideBarLevelProps = {
-  action: (pathValue: String, index: number) => void;
-  pages: { key: String; directory: String; value: String }[][];
-  path: String[];
+  action: (pathValue: string, index: number) => void;
+  pages: { key: string; directory: string; value: string }[][];
+  path: string[];
   level: number;
 };
 
@@ -61,7 +61,7 @@ const SideBarLevel = ({ path, action, pages, level }: SideBarLevelProps) => {
 };
 
 const SideBar = ({ children, pages, path, action }: SideBarProps) => {
-  const local_path: String[] = path.split("/");
+  const local_path: string[] = path.split("/");
   var level: number = 0;
   return (
     <>

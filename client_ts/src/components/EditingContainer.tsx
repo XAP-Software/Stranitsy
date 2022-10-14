@@ -51,7 +51,9 @@ const EditingContainer = ({
           </div>
           <br />
         </div>
-        <div className='editorSpace'></div>
+        <div className='editorSpace'>
+          {children}
+        </div>
       </div>
     </>
   );
